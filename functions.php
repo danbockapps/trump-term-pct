@@ -24,6 +24,10 @@ foreach($requiredConstants as $rc) {
 \Codebird\Codebird::setConsumerKey(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET);
 $cb->setToken(OAUTH_TOKEN, OAUTH_SECRET);
 
+function getPctTweetText() {
+  $tweetText = calcPct() . " of Trump's four-year presidential term has elapsed.";
+  return $tweetText;
+}
 
 function calcPct() {
   $start = strToTime('2017-01-20 12:00:00');
@@ -43,6 +47,14 @@ function calcPct() {
 
 function echon($s) {
   echo $s . "\n";
+}
+
+function logtxt($s) {
+  file_put_contents(
+    'log.txt',
+    date("Y-m-d G:i:s") . "\n" . $s . "\n\n",
+    FILE_APPEND
+  );
 }
 
 ?>

@@ -24,15 +24,26 @@ foreach($requiredConstants as $rc) {
 \Codebird\Codebird::setConsumerKey(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET);
 $cb->setToken(OAUTH_TOKEN, OAUTH_SECRET);
 
-function getPctTweetText() {
-  $tweetText = calcPct() . " of Trump's four-year presidential term has elapsed.";
+function getPctTweetText($testTime = null) {
+  $pct = calcPct($testTime);
+
+  // if $pct is e.g. 7.001% or 7.002%, round down.
+  if(strpos($pct, '001') !== false || strpos($pct, '002') !== false) {
+    $pct = str_replace(array('001', '002'), '000', $pct);
+  }
+
+  $tweetText = $pct . " of Trump's four-year presidential term has elapsed.";
   return $tweetText;
 }
 
-function calcPct() {
+function calcPct($testTime = null) {
   $start = strToTime('2017-01-20 12:00:00');
   $end = strToTime('2021-01-20 12:00:00');
-  $now = time();
+
+  if($testTime)
+    $now = strtotime($testTime);
+  else
+    $now = time();
 
   $elapsed = $now - $start;
   $total = $end - $start;

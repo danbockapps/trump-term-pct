@@ -32,8 +32,23 @@ function getPctTweetText($testTime = null) {
     $pct = str_replace(array('001', '002'), '000', $pct);
   }
 
-  $tweetText = $pct . " of Trump's four-year presidential term has elapsed.";
+  $tweetText = $pct . " of Trump's presidential term has elapsed, unless he leaves office early.";
   return $tweetText;
+}
+
+function getProbTweetText() {
+  $pct = getProbPct();
+
+  if($pct > 0 && $pct < 100) {
+    $tweetText = "There is a " . $pct .
+        "% chance Donald Trump will still be president on December 31, " .
+        "according to data from @PredictIt.";
+    return $tweetText;
+  }
+
+  else {
+    exit("Unable to get probability");
+  }
 }
 
 function calcPct($testTime = null) {
@@ -54,6 +69,13 @@ function calcPct($testTime = null) {
   // digit will change every hour.
 
   return sprintf("%.3f%%", $elapsed * 100 / $total);
+}
+
+function getProbPct() {
+  $predictItData = json_decode(file_get_contents(
+      'https://www.predictit.org/api/marketdata/ticker/TRUMP.PRES.123117'));
+
+  return $predictItData->Contracts[0]->LastTradePrice * 100;
 }
 
 function echon($s) {

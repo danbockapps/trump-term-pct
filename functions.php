@@ -51,6 +51,20 @@ function getProbTweetText() {
   }
 }
 
+function get538TweetText() {
+  $pct = get538Pct();
+
+  if(substr($pct, -1) == '%') {
+    $tweetText = "Trump's current average approval rating is " . $pct .
+        ", according to data from @FiveThirtyEight.";
+    return $tweetText;
+  }
+
+  else {
+    exit("Unable to get approval rating.");
+  }
+}
+
 function calcPct($testTime = null) {
   $start = strToTime('2017-01-20 12:00:00');
   $end = strToTime('2021-01-20 12:00:00');
@@ -76,6 +90,20 @@ function getProbPct() {
       'https://www.predictit.org/api/marketdata/ticker/TRUMP.PRES.123117'));
 
   return $predictItData->Contracts[0]->LastTradePrice * 100;
+}
+
+function get538Pct() {
+  $data = json_decode(file_get_contents(
+      'compress.zlib://' .
+      'https://projects.fivethirtyeight.com/trump-approval-ratings/approval.json'));
+
+  $today = date('Y-m-d');
+
+  foreach($data as $row) {
+    if($row->date == $today && $row->subgroup == 'All polls') {
+      return sprintf("%.1f%%", $row->approve_estimate);
+    }
+  }
 }
 
 function echon($s) {

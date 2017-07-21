@@ -61,8 +61,14 @@ function get538TweetText() {
   }
 
   else {
+    logtxt("Unable to get approval rating from 538.");
     exit("Unable to get approval rating.");
   }
+}
+
+function getWapoTweetText() {
+  return '"' . getWapoSentence() .
+    '" https://www.washingtonpost.com/news/politics/wp/2017/06/16/a-new-automated-guide-to-the-future-of-washington-the-trump-impeachment-index';
 }
 
 function calcPct($testTime = null) {
@@ -103,6 +109,25 @@ function get538Pct() {
     if($row->date == $today && $row->subgroup == 'All polls') {
       return sprintf("%.1f%%", $row->approve_estimate);
     }
+  }
+}
+
+function getWapoSentence() {
+  $page = file_get_contents('https://www.pbump.net/files/post/impeach/');
+
+  $sentenceStart = strpos($page, 'The Trump Impeachment Index is currently at');
+  $sentenceEnd = strpos($page, '</h2>', $sentenceStart);
+
+  logtxt($sentenceStart . ' ' . $sentenceEnd);
+
+  if($sentenceStart && $sentenceEnd) {
+    $sentence = strip_tags(substr($page, $sentenceStart, $sentenceEnd - $sentenceStart));
+    logtxt($sentence);
+    return $sentence;
+  }
+  else {
+    logtxt('Sentence not found!');
+    logtxt($page);
   }
 }
 

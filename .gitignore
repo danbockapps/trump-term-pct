@@ -1,6 +1,6 @@
 libraries
 recycle_bin
 auth.ini
-log.txt
+log*.txt
 error_log
 schedule.txt

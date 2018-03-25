@@ -93,7 +93,7 @@ function calcPct($testTime = null) {
 
 function getProbPct() {
   $predictItData = json_decode(file_get_contents(
-      'https://www.predictit.org/api/marketdata/ticker/TRUMP.PRES.123117'));
+      'https://www.predictit.org/api/marketdata/ticker/TRUMP.PRES.123118'));
 
   return $predictItData->Contracts[0]->LastTradePrice * 100;
 }

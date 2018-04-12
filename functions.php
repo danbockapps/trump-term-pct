@@ -71,6 +71,18 @@ function getWapoTweetText() {
     '" https://www.washingtonpost.com/news/politics/wp/2017/06/16/a-new-automated-guide-to-the-future-of-washington-the-trump-impeachment-index';
 }
 
+function getDaysTillElectionTweetText($testDate = null) {
+  $numDays = getDaysTillElection($testDate);
+
+  return
+    "There " .
+    ($numDays == 1 ? "is " : "are ") .
+    $numDays .
+    " day" .
+    ($numDays == 1 ? " " : "s ") .
+    "until Election Day, November 6, 2018.";
+}
+
 function calcPct($testTime = null) {
   $start = strToTime('2017-01-20 12:00:00');
   $end = strToTime('2021-01-20 12:00:00');
@@ -129,6 +141,19 @@ function getWapoSentence() {
     logtxt('Sentence not found!');
     logtxt($page);
   }
+}
+
+function getDaysTillElection($testTime = null) {
+  $end = new DateTime('2018-11-06');
+
+  if($testTime == null) {
+    $now = new DateTime();;
+  }
+  else {
+    $now = new DateTime($testTime);
+  }
+
+  return date_diff($end, $now)->days + 1;
 }
 
 function echon($s) {

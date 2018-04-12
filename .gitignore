@@ -4,3 +4,4 @@ auth.ini
 log*.txt
 error_log
 schedule.txt
+testRunner.php

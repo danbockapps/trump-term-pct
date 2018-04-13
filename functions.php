@@ -13,6 +13,9 @@ $requiredConstants = array(
   'TWITTER_CONSUMER_SECRET',
   'OAUTH_TOKEN',
   'OAUTH_SECRET',
+  'DATABASENAME',
+  'DATABASEUSERNAME',
+  'DATABASEPASSWORD'
 );
 
 foreach($requiredConstants as $rc) {
@@ -23,6 +26,8 @@ foreach($requiredConstants as $rc) {
 
 \Codebird\Codebird::setConsumerKey(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET);
 $cb->setToken(OAUTH_TOKEN, OAUTH_SECRET);
+
+require_once('databaseFunctions.php');
 
 function getPctTweetText($testTime = null) {
   $pct = calcPct($testTime);
@@ -83,6 +88,28 @@ function getDaysTillElectionTweetText($testDate = null) {
     "until Election Day, November 6, 2018.";
 }
 
+function getGenericBallotTweetText() {
+  $objs = getGenericBallot();
+
+  if($objs == null) {
+    return null;
+  }
+  else {
+    return 'NEW FORECAST from FiveThirtyEight: ' . PHP_EOL .
+    'Dems ' . sprintf("%.1f%%", $objs[0]->dem_estimate) .
+    ', GOP ' . sprintf("%.1f%%", $objs[0]->rep_estimate) .
+    PHP_EOL . PHP_EOL .
+    'One week ago: ' . PHP_EOL .
+    'Dems ' . sprintf("%.1f%%", $objs[1]->dem_estimate) .
+    ', GOP ' . sprintf("%.1f%%", $objs[1]->rep_estimate) .
+    PHP_EOL . PHP_EOL .
+    'One month ago: ' . PHP_EOL .
+    'Dems ' . sprintf("%.1f%%", $objs[2]->dem_estimate) .
+    ', GOP ' . sprintf("%.1f%%", $objs[2]->rep_estimate) .
+    ' https://projects.fivethirtyeight.com/congress-generic-ballot-polls/';
+  }
+}
+
 function calcPct($testTime = null) {
   $start = strToTime('2017-01-20 12:00:00');
   $end = strToTime('2021-01-20 12:00:00');
@@ -122,6 +149,68 @@ function get538Pct() {
       return sprintf("%.1f%%", $row->approve_estimate);
     }
   }
+}
+
+function getGenericBallot() {
+  //echon('hello world'); return;
+  $data = getGenericBallotData();
+
+  $today = date('Y-m-d');
+  $yesterday = date('Y-m-d', strtotime('-1 day'));
+  $oneWeekAgo = date('Y-m-d', strtotime('-1 week'));
+  $oneMonthAgo = date('Y-m-d', strtotime('-1 month'));
+
+  foreach($data as $row) {
+    if($row->subgroup == 'All polls') {
+      switch($row->date) {
+        case $today:
+          $todayObj = $row;
+          break;
+        case $yesterday:
+          $yesterdayObj = $row;
+          break;
+        case $oneWeekAgo:
+          $oneWeekAgoObj = $row;
+          break;
+        case $oneMonthAgo:
+          $oneMonthAgoObj = $row;
+          break;
+      }
+    }
+  }
+
+  $latestObj = isset($todayObj) ? $todayObj : $yesterdayObj;
+
+  if(alreadyInDb($latestObj)) {
+    return null;
+  }
+  else {
+    saveTweetToDb($latestObj);
+    return [$latestObj, $oneWeekAgoObj, $oneMonthAgoObj];
+  }
+}
+
+function alreadyInDb($obj) {
+  $qr = pdo_select('
+    select *
+    from generic_ballot
+    where date = ? and round(dem_estimate, 1) = round(?, 1) and round(rep_estimate, 1) = round(?, 1)
+  ', array($obj->date, $obj->dem_estimate, $obj->rep_estimate));
+
+  return count($qr);
+}
+
+function saveTweetToDb($obj) {
+  pdo_upsert('
+    insert into generic_ballot(date, dem_estimate, rep_estimate) values (?, ?, ?)
+  ', array($obj->date, $obj->dem_estimate, $obj->rep_estimate));
+}
+
+function getGenericBallotData() {
+  return json_decode(file_get_contents(
+    'compress.zlib://' .
+    'https://projects.fivethirtyeight.com/congress-generic-ballot-polls/generic.json'
+  ));
 }
 
 function getWapoSentence() {

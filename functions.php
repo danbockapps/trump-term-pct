@@ -152,7 +152,6 @@ function get538Pct() {
 }
 
 function getGenericBallot() {
-  //echon('hello world'); return;
   $data = getGenericBallotData();
 
   $today = date('Y-m-d');
@@ -210,6 +209,21 @@ function getGenericBallotData() {
   return json_decode(file_get_contents(
     'compress.zlib://' .
     'https://projects.fivethirtyeight.com/congress-generic-ballot-polls/generic.json'
+  ));
+}
+
+function getHouseTweetText() {
+  $houseData = getHouseData();
+  print_r($houseData->nationalTrends);
+  print_r(array_column($houseData->nationalTrends, 'party'));
+  $demProb = array_search("D", array_column((array) ($houseData->nationalTrends), 'party'));
+  return $demProb;
+}
+
+function getHouseData() {
+  return json_decode(file_get_contents(
+    'compress.zlib://' .
+    'https://projects.fivethirtyeight.com/2018-midterm-election-forecast/house/home.json'
   ));
 }
 

@@ -1,16 +1,22 @@
+import { getLatestTweet, saveAllTweets } from './firestore'
 import { searchLatest, sendTweet } from './tweet'
 
 export const runFakeNews = async () => {
   const results = await searchLatest('from:realdonaldtrump "fake news"')
-
   console.log(results)
+
+  const saveTweetsResult = await saveAllTweets(results)
+  console.log(saveTweetsResult)
+
+  const latestTweet = await getLatestTweet()
+  console.log(latestTweet)
 
   const tweetResult = await sendTweet(
     `It's been ${dateDiff(
-      results[0].date,
+      latestTweet.date,
     )} since Donald Trump last tweeted about "Fake News".`,
     'realDonaldTrump',
-    results[0].id,
+    latestTweet.id,
   )
 
   console.log(tweetResult)

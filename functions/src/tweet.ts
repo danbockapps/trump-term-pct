@@ -1,4 +1,5 @@
 import Twitter from 'twitter-lite'
+import { TweetDoc } from './firestore'
 require('dotenv').config()
 
 let twitter: Twitter
@@ -33,7 +34,9 @@ export const sendTweet = async (
   return result
 }
 
-export const searchLatest = async (terms: string) => {
+export const searchLatest: (
+  terms: string,
+) => Promise<TweetDoc[]> = async terms => {
   const result = (await twitter.get('search/tweets', {
     q: terms,
     result_type: 'recent',

@@ -1,7 +1,12 @@
 import * as functions from 'firebase-functions'
-import { runFakeNews } from './functions'
+import { runFakeNews, runSP500 } from './functions'
 
-export const run = functions.pubsub
-  .schedule('11 3,6,10,12,14,17,19,22 * * *')
+export const fakeNews = functions.pubsub
+  .schedule('0 10,22 * * *')
   .timeZone('America/New_York')
   .onRun(runFakeNews)
+
+export const sp500 = functions.pubsub
+  .schedule('3 16 * * 1-5')
+  .timeZone('America/New_York')
+  .onRun(runSP500)

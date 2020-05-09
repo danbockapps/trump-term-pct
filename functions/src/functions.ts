@@ -1,5 +1,24 @@
-import { getLatestTweet, saveAllTweets } from './firestore'
-import { searchLatest, sendTweet } from './tweet'
+import moment from 'moment'
+import { getLatestTweet, saveAllTweets, saveTweet } from './firestore'
+import { getData, getRecordHighClose } from './stocks'
+import { searchLatest, sendTweet, Tweet } from './tweet'
+
+export const runSP500 = async () => {
+  const data = await getData()
+  const recordHigh = getRecordHighClose(data)
+  const today = data[data.length - 1]
+
+  const tweetResult: Tweet = await sendTweet(
+    `The S&P 500 closed at ${Math.round(today.close)}. That's down ${
+      Math.round((1000 * (recordHigh.close - today.close)) / recordHigh.close) /
+      10
+    }% from the record high of ${Math.round(recordHigh.close)} on ${moment(
+      recordHigh.timestamp,
+    ).format('LL')}.`,
+  )
+
+  await saveTweet(tweetResult)
+}
 
 export const runFakeNews = async () => {
   const results = await searchLatest('from:realdonaldtrump "fake news"')
@@ -19,7 +38,7 @@ export const runFakeNews = async () => {
     latestTweet.id,
   )
 
-  console.log(tweetResult)
+  await saveTweet(tweetResult)
 }
 
 export const dateDiff = (date1: Date, date2?: Date) => {

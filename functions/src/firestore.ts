@@ -8,6 +8,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="/Users/danbock/code/trump-term-pct/functi
 */
 
 import * as admin from 'firebase-admin'
+import { Tweet } from './tweet'
 
 admin.initializeApp({
   credential: admin.credential.applicationDefault(),
@@ -15,6 +16,18 @@ admin.initializeApp({
 })
 
 const db = admin.firestore()
+
+export const saveTweet = async (tweet: Tweet) => {
+  if (tweet.id_str)
+    db.collection('tweetResults')
+      .doc(tweet.id_str)
+      .set({
+        id_str: tweet.id_str,
+        text: tweet.text,
+        quoted_status_id_str: tweet.quoted_status_id_str || null,
+        created_at: new Date(tweet.created_at),
+      })
+}
 
 export const saveAllTweets = async (tweets: TweetDoc[]) => {
   let batch = db.batch()

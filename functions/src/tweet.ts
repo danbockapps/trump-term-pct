@@ -23,14 +23,12 @@ export const sendTweet = async (
   userToQuote?: string,
   idToQuote?: string,
 ) => {
-  let attachment_url: any = undefined
-  if (userToQuote && idToQuote) {
-    attachment_url = `https://twitter.com/${userToQuote}/status/${idToQuote}`
-  }
-  const result = await twitter.post('statuses/update', {
-    status,
-    attachment_url,
-  })
+  const body: { status: string; attachment_url?: string } = { status }
+
+  if (userToQuote && idToQuote)
+    body.attachment_url = `https://twitter.com/${userToQuote}/status/${idToQuote}`
+
+  const result = await twitter.post('statuses/update', body)
   return result
 }
 
@@ -61,4 +59,12 @@ interface Status {
   text: string
   truncated: boolean
   retweeted_status?: object
+}
+
+export interface Tweet {
+  id_str: string
+  text: string
+  quoted_status_id_str: string
+  created_at: string
+  // There's a ton of other stuff in an actual Tweet object
 }
